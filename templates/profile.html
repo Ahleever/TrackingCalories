@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card p-4 mb-4">
+            <h3 class="mb-3">Your profile</h3>
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-4">
+                        <label class="form-label">Height (ft)</label>
+                        <input name="height_ft" type="number" step="1" class="form-control" value="{{ ft }}" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Height (in)</label>
+                        <input name="height_in" type="number" step="0.1" class="form-control" value="{{ inch }}" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Weight (lb)</label>
+                        <input name="weight_lb" type="number" step="0.1" class="form-control" value="{{ lb }}" />
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label">Age</label>
+                        <input name="age" type="number" class="form-control" value="{{ p.age or '' }}" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Sex</label>
+                        <select name="sex" class="form-select">
+                            <option value="" {{ 'selected' if not p.sex }}>Select…</option>
+                            <option value="M" {{ 'selected' if p.sex=='M' }}>Male</option>
+                            <option value="F" {{ 'selected' if p.sex=='F' }}>Female</option>
+                        </select>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label">Activity</label>
+                        <select name="activity" class="form-select">
+                            {% for key,label in [
+                            ('sedentary','Sedentary'),
+                            ('lightly_active','Lightly active'),
+                            ('moderately_active','Moderately active'),
+                            ('very_active','Very active'),
+                            ('extra_active','Extra active')
+                            ] %}
+                            <option value="{{ key }}" {{ 'selected' if p.activity==key }}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label">Goal</label>
+                        <select name="goal" class="form-select">
+                            <option value="maintain" {{ 'selected' if p.goal=='maintain' }}>Maintain</option>
+                            <option value="lose" {{ 'selected' if p.goal=='lose' }}>Lose</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary mt-3">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card p-4 mb-4">
+            <h3 class="mb-3">Benchmarks</h3>
+            {% if metrics.bmi %}
+            {# Height/weight in imperial for readability #}
+            {% set inches = (p.height_cm/2.54) if p.height_cm else None %}
+            {% if inches is not none %}
+            <p class="metric mb-1"><strong>Height:</strong> {{ (inches//12)|int }} ft {{ (inches%12)|round(1) }} in</p>
+            {% endif %}
+            {% if p.weight_kg %}
+            <p class="metric mb-1"><strong>Weight:</strong> {{ (p.weight_kg*2.20462)|round(1) }} lb</p>
+            {% endif %}
+
+            <p class="metric mb-1">
+                <strong>Body Mass Index (BMI):</strong> {{ metrics.bmi }}
+            </p>
+            <p class="metric mb-1">
+                <strong>Basal Metabolic Rate (BMR):</strong> {{ metrics.bmr }} kcal/day
+            </p>
+            <p class="metric mb-1">
+                <strong>Total Daily Energy Expenditure (TDEE):</strong> ~{{ metrics.tdee }} kcal/day
+            </p>
+            <p class="metric mb-0">
+                <strong>Daily target intake:</strong> {{ metrics.target_calories }} kcal/day ({{ p.goal }})
+            </p>
+            {% else %}
+            <p class="text-muted">Add your height, weight, age, and sex to see your Body Mass Index (BMI), Basal Metabolic Rate (BMR), Total Daily
+                Energy Expenditure (TDEE), and a daily target.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

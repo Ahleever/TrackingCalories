@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or 'FitTrack' }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background: #f8f9fa;
+            color: #212529;
+        }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+        }
+
+        .navbar,
+        .dropdown-menu {
+            background: #ffffff;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .navbar-brand {
+            color: #0d6efd !important;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .form-control,
+        .form-select {
+            background: #ffffff;
+            color: #212529;
+            border-color: #ced4da;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            box-shadow: none;
+            border-color: #0d6efd;
+        }
+
+        a,
+        .nav-link {
+            color: #0d6efd;
+        }
+
+        .btn-primary {
+            background: #0d6efd;
+            border-color: #0d6efd;
+        }
+
+        .btn-outline-light {
+            border-color: #6c757d;
+            color: #212529;
+        }
+
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .metric {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">🔥 FitTrack</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarsExample">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('add_entry') }}">Add Entry</a></li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_panel') }}">Admin</a></li>
+                    {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item"><span class="nav-link disabled">{{ current_user.email }}</span></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="my-3">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category=='error' else category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+
+        {% block content %}{% endblock %}
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

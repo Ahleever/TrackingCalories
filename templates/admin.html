@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-4">
+    <h3 class="mb-3">Admin</h3>
+    <p class="text-muted">Users: {{ users|length }} · Entries: {{ total_entries }}</p>
+    <div class="table-responsive">
+        <table class="table table-dark table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Admin</th>
+                    <th>Created</th>
+                    <th>Age</th>
+                    <th>Sex</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.email }}</td>
+                    <td>{{ 'yes' if u.is_admin else 'no' }}</td>
+                    <td>{{ u.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ u.profile and u.profile.age or '' }}</td>
+                    <td>{{ u.profile and u.profile.sex or '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
