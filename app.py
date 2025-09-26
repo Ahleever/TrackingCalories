@@ -25,9 +25,6 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "login"
 
-# -----------------------------------------------------------------------------
-# Models
-# -----------------------------------------------------------------------------
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -49,14 +46,13 @@ class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-    # UI is imperial (ft/in, lb) but we store metric internally
-    height_cm = db.Column(db.Float)
-    weight_kg = db.Column(db.Float)
+    height_in = db.Column(db.Float)
+    weight_lb = db.Column(db.Float)
 
     age = db.Column(db.Integer)
-    sex = db.Column(db.String(1))  # "M" or "F"
+    sex = db.Column(db.String(1))
     activity = db.Column(db.String(20), default="moderately_active")
-    goal = db.Column(db.String(20), default="maintain")  # "maintain" or "lose"
+    goal = db.Column(db.String(20), default="maintain")  
 
 
 class Entry(db.Model):
@@ -65,7 +61,7 @@ class Entry(db.Model):
     date = db.Column(db.Date, default=dt.date.today, index=True)
     calories_in = db.Column(db.Integer, default=0)
     calories_out = db.Column(db.Integer, default=0)
-    weight_kg = db.Column(db.Float, nullable=True)
+    weight_lb = db.Column(db.Float, nullable=True)
     notes = db.Column(db.Text, nullable=True)
 
 
@@ -107,18 +103,18 @@ class Metrics:
     target_calories: Optional[int]
 
 def calculate_metrics(profile: Optional[Profile]) -> Metrics:
-    if not profile or not all([profile.height_cm, profile.weight_kg, profile.age, profile.sex]):
+    if not profile or not all([profile.height_in, profile.weight_lb, profile.age, profile.sex]):
         return Metrics(None, None, None, None)
 
-    h = profile.height_cm
-    w = profile.weight_kg
+    h = profile.height_in
+    w = profile.weight_lb
     a = profile.age
     s = (profile.sex or "").upper()
 
     # BMI
     bmi = round(w / (cm_to_m(h) ** 2), 1)
 
-    # BMR (Mifflin–St Jeor)
+    # BMR 
     bmr = 10 * w + 6.25 * h - 5 * a + (5 if s == "M" else -161)
 
     # TDEE
@@ -159,7 +155,7 @@ def exercise_recommendations(profile: Optional[Profile]):
     return base + [{"name": "Full-body strength 2x/week", "met": 5.0, "duration_min": 40, "type": "strength"}]
 
 # -----------------------------------------------------------------------------
-# Admin decorator
+# Admin
 # -----------------------------------------------------------------------------
 def admin_required(view_func):
     @wraps(view_func)
@@ -193,7 +189,7 @@ def register():
         u = User(email=email)
         u.set_password(password)
 
-        # Auto-admin if email appears in ADMIN_EMAILS env var (comma-separated)
+        # Auto-admin if email appears in ADMIN_EMAILS
         admin_emails = [x.strip().lower() for x in os.getenv("ADMIN_EMAILS", "").split(",") if x.strip()]
         if email in admin_emails:
             u.is_admin = True
@@ -236,13 +232,12 @@ def logout():
 def profile():
     p = current_user.profile
     if request.method == "POST":
-        # Imperial inputs (store metric)
         ft = float(request.form.get("height_ft") or 0)
         inch = float(request.form.get("height_in") or 0)
         lb = float(request.form.get("weight_lb") or 0)
 
-        p.height_cm = ft_in_to_cm(ft, inch) if (ft or inch) else None
-        p.weight_kg = lbs_to_kg(lb) if lb else None
+        p.height_in = ft_in_to_cm(ft, inch) if (ft or inch) else None
+        p.weight_lb = lbs_to_kg(lb) if lb else None
         p.age = int(request.form.get("age") or 0) or None
         p.sex = (request.form.get("sex") or "").upper() or None
         p.activity = request.form.get("activity") or "moderately_active"
@@ -254,11 +249,10 @@ def profile():
 
     metrics = calculate_metrics(p)
 
-    # For imperial display defaults
-    inches = (p.height_cm / 2.54) if p and p.height_cm else None
+    inches = (p.height_in / 2.54) if p and p.height_in else None
     ft = int(inches // 12) if inches else ""
     inch = round(inches % 12, 1) if inches else ""
-    lb = round(kg_to_lbs(p.weight_kg), 1) if p and p.weight_kg else ""
+    lb = round(kg_to_lbs(p.weight_lb), 1) if p and p.weight_lb else ""
 
     return render_template("profile.html", p=p, metrics=metrics, ft=ft, inch=inch, lb=lb)
 
@@ -298,14 +292,14 @@ def add_entry():
         date = dt.datetime.strptime(date_str, "%Y-%m-%d").date()
 
         weight_lb = float(request.form.get("weight_lb") or 0)
-        weight_kg = lbs_to_kg(weight_lb) if weight_lb else None
+        weight_lb = lbs_to_kg(weight_lb) if weight_lb else None
 
         e = Entry(
             user_id=current_user.id,
             date=date,
             calories_in=int(request.form.get("calories_in") or 0),
             calories_out=int(request.form.get("calories_out") or 0),
-            weight_kg=weight_kg,
+            weight_lb=weight_lb,
             notes=request.form.get("notes") or None,
         )
         db.session.add(e)
@@ -323,7 +317,7 @@ def admin_panel():
     return render_template("admin.html", users=users, total_entries=total_entries)
 
 # -----------------------------------------------------------------------------
-# CLI helper and bootstrap
+# CLI helper 
 # -----------------------------------------------------------------------------
 @app.cli.command("init-db")
 def init_db():

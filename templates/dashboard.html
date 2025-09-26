@@ -39,7 +39,7 @@
                             <td>{{ e.date.strftime('%Y-%m-%d') }}</td>
                             <td>{{ e.calories_in }}</td>
                             <td>{{ e.calories_out }}</td>
-                            <td>{% if e.weight_kg %}{{ (e.weight_kg*2.20462)|round(1) }} lb{% endif %}</td>
+                            <td>{% if e.weight_lb %}{{ (e.weight_lb*2.20462)|round(1) }} lb{% endif %}</td>
                             <td>{{ e.notes or '' }}</td>
                         </tr>
                         {% endfor %}

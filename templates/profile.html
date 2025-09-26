@@ -65,12 +65,12 @@
             <h3 class="mb-3">Benchmarks</h3>
             {% if metrics.bmi %}
             {# Height/weight in imperial for readability #}
-            {% set inches = (p.height_cm/2.54) if p.height_cm else None %}
+            {% set inches = (p.height_in/2.54) if p.height_in else None %}
             {% if inches is not none %}
             <p class="metric mb-1"><strong>Height:</strong> {{ (inches//12)|int }} ft {{ (inches%12)|round(1) }} in</p>
             {% endif %}
-            {% if p.weight_kg %}
-            <p class="metric mb-1"><strong>Weight:</strong> {{ (p.weight_kg*2.20462)|round(1) }} lb</p>
+            {% if p.weight_lb %}
+            <p class="metric mb-1"><strong>Weight:</strong> {{ (p.weight_lb*2.20462)|round(1) }} lb</p>
             {% endif %}
 
             <p class="metric mb-1">
